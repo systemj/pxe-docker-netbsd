@@ -1,0 +1,107 @@
+services:
+  dhcpd:
+    image: "ubuntu:22.04-pxe"
+    build: .
+    env_file: config/dhcpd/dhcpd.env
+    entrypoint:
+      - /bin/bash
+      - -c
+    # from:
+    #   /etc/default/isc-dhcp-server
+    #   /etc/systemd/system/multi-user.target.wants/isc-dhcp-server.service
+    command:
+      - |-
+        touch /var/lib/dhcp/dhcpd.leases
+        mkdir -p /run/dhcp-server
+        chown root:dhcpd /var/lib/dhcp /var/lib/dhcp/dhcpd.leases /run/dhcp-server
+        chmod 775 /var/lib/dhcp /run/dhcp-server
+        chmod 664 /var/lib/dhcp/dhcpd.leases
+        dhcpd -d -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf /etc/dhcp/dhcpd.conf $${INTERFACESv4}
+    network_mode: "host"
+    ports:
+      - "67:67/udp"
+    volumes:
+      - ./config/dhcpd/dhcpd.conf:/etc/dhcp/dhcpd.conf
+
+  pxe:
+    image: "ubuntu:22.04-pxe"
+    build: .
+    entrypoint:
+      - /bin/bash
+      - -c
+    command:
+      - |-
+        /usr/sbin/in.tftpd --foreground --user tftp --address :69 --secure /var/lib/tftpboot -vvv
+    network_mode: "host"
+    ports:
+      - "69:69/udp"
+    volumes:
+      - ./tftpboot:/var/lib/tftpboot
+
+  setup:
+    image: "ubuntu:22.04-pxe"
+    build: .
+    entrypoint:
+      - /bin/bash
+      - -c
+    command:
+      - |-
+        echo "initializing files"
+        if ! test -s /etc/dhcp/dhcpd.conf.custom ; then
+          echo "updating dhcpd.conf with default config"
+          cp /etc/dhcp/dhcpd.conf{,.custom}
+        fi
+        while read tftp_file
+          do
+          if ! test -f /var/lib/tftpboot/$$(basename $${tftp_file}) ; then
+            cp -v $${tftp_file} /var/lib/tftpboot
+          fi
+        done << EOF
+        /usr/lib/syslinux/modules/bios/menu.c32
+        /usr/lib/syslinux/modules/bios/ldlinux.c32
+        /usr/lib/syslinux/modules/bios/libutil.c32
+        /usr/lib/PXELINUX/pxelinux.0
+        EOF
+        echo "done"
+    profiles:
+      - setup
+    volumes:
+      - ./tftpboot:/var/lib/tftpboot
+      - ./config/dhcpd/dhcpd.conf:/etc/dhcp/dhcpd.conf.custom
+
+  setup-netbsd:
+    image: "ubuntu:22.04-pxe"
+    build: .
+    entrypoint:
+      - /bin/bash
+      - -c
+    command:
+      - |-
+        # a bold assumption
+        ISO="$$(ls -1 /iso/NetBSD-*.iso | head -1)"
+        echo "mounting $${ISO}"
+        mount -o loop $${ISO} /mnt
+        echo "initializing NetBSD files"
+        while read netbsd_file
+          do
+          if ! test -f /var/lib/tftpboot/$$(basename $${netbsd_file}) ; then
+            cp -v $${netbsd_file} /var/lib/tftpboot
+          fi
+        done << EOF
+        /mnt/i386/installation/misc/pxeboot_ia32.bin
+        /mnt/i386/binary/kernel/netbsd-INSTALL.gz
+        /config/boot.cfg
+        EOF
+        if ! grep -q -i netbsd /var/lib/tftpboot/pxelinux.cfg/default ; then
+          echo "updating tftpboot/pxelinux.cfg/default"
+          cat /config/pxelinux.cfg >> /var/lib/tftpboot/pxelinux.cfg/default
+        fi
+        umount /mnt
+        echo "done!"
+    privileged: true
+    profiles:
+      - setup-netbsd
+    volumes:
+      - ./config/netbsd:/config
+      - ./iso:/iso
+      - ./tftpboot:/var/lib/tftpboot

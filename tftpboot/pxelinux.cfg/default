@@ -1,0 +1,13 @@
+default menu.c32
+prompt 0
+timeout 300
+ontimeout internaldrive
+menu title PXE Boot Menu
+
+label internaldrive
+menu label Boot from internal drive
+localboot 0
+
+label netbsdi386
+menu label NetBSD i386
+kernel pxeboot_ia32.bin

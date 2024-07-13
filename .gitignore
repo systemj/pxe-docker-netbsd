@@ -1,0 +1,4 @@
+iso/*
+tftpboot/**
+!tftpboot/pxelinux.cfg
+!tftpboot/pxelinux.cfg/default
