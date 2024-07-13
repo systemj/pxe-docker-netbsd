@@ -9,7 +9,7 @@ docker-compose run setup
 ## Configure
 
 ## dhcpd.env
-Update `INTERFACESv4` in `dhcpd.env` to match your local interface name.
+Update `INTERFACESv4` in `config/dhcpd/dhcpd.env` to match your local interface name.
 
 Example:
 ```bash
@@ -17,7 +17,7 @@ INTERFACESv4=enp5s0
 ```
 
 ## dhcpd.conf
-Update the default `dhcpd.conf` that gets created with your own subnets, clients etc.
+Update the default `config/dhcpd/dhcpd.conf` that gets created with your own subnets, clients etc.
 
 Example:
 ```conf
@@ -40,23 +40,6 @@ host jetway {
     filename "pxelinux.0";
 }
 ``` 
-
-## tftpboot/pxelinux.cfg/default
-```
-default menu.c32
-prompt 0
-timeout 300
-ontimeout internaldrive
-menu title PXE Boot Menu
-
-label internaldrive
-menu label Boot from internal drive
-localboot 0
-
-label netbsdi386
-menu label NetBSD i386
-kernel pxeboot_ia32.bin
-```
 
 ## References
 - https://www.linux.org/threads/lfcs-%E2%80%93-understanding-pxe-boot.44379/
