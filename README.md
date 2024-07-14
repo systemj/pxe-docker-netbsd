@@ -2,24 +2,34 @@
 
 A helper project to boot the network install for NetBSD on an old PC.
 
+## Download the NetBSD ISO
+Download the NetBSD ISO (ex: NetBSD-0.0-i386.iso) and place it in the `iso` directory.
+- https://cdn.netbsd.org/pub/NetBSD/iso/
+
 ## Initialize
-This creates required files in `tftpboot` and a default `dhcpd.conf`.
+This creates required pxelinux files in `tftpboot` and a default `dhcpd.conf`.
 ```bash
 docker-compose run setup
 ```
 
-## Configure
+## Setup NetBSD Files
+This adds the necessary files from the NetBSD ISO to `tftpboot` and adds the pxelinux menu entry.
+```bash
+docker-compose run setup-netbsd
+```
 
-## dhcpd.env
-Update `INTERFACESv4` in `config/dhcpd/dhcpd.env` to match your local interface name.
+## Local Network Configuration
+
+### dhcpd.env
+Update `INTERFACESv4` in `config/dhcpd/dhcpd.env` to match your physical host interface name.
 
 Example:
 ```bash
 INTERFACESv4=enp5s0
 ```
 
-## dhcpd.conf
-Update the default `config/dhcpd/dhcpd.conf` that gets created with your own subnets, clients etc.
+### dhcpd.conf
+Update the default `config/dhcpd/dhcpd.conf` that has been created with your specifics for own subnets, clients etc.
 
 Example:
 ```conf
@@ -42,6 +52,15 @@ host jetway {
     filename "pxelinux.0";
 }
 ``` 
+
+## PXE Boot NetBSD Install
+- Boot the client PC
+- At the "PXE Boot Menu" choose "NetBSD i386"
+- At the "NetBSD/x86 PXE Boot" screen press any key other than "enter" to access the boot cli.
+- Boot the NetBSD Installer and then install via HTTP.
+```bash
+boot tftp:netbsd-INSTALL.gz
+```
 
 ## References
 - https://www.linux.org/threads/lfcs-%E2%80%93-understanding-pxe-boot.44379/
