@@ -65,3 +65,6 @@ boot tftp:netbsd-INSTALL.gz
 ## References
 - https://www.linux.org/threads/lfcs-%E2%80%93-understanding-pxe-boot.44379/
 - https://linux.die.net/man/8/in.tftpd
+
+## Future Integration?
+- https://github.com/madworx/docker-netbsd/tree/master
