@@ -1,5 +1,7 @@
 # PXE Boot Via Docker Compose
 
+A helper project to boot the network install for NetBSD on an old PC.
+
 ## Initialize
 This creates required files in `tftpboot` and a default `dhcpd.conf`.
 ```bash
