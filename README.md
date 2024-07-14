@@ -53,11 +53,17 @@ host jetway {
 }
 ``` 
 
+## Start Services
+```bash
+docker-compose build
+docker-compose up
+```
+
 ## PXE Boot NetBSD Install
 - Boot the client PC
 - At the "PXE Boot Menu" choose "NetBSD i386"
 - At the "NetBSD/x86 PXE Boot" screen press any key other than "enter" to access the boot cli.
-- Boot the NetBSD Installer and then install via HTTP.
+- Boot the NetBSD Installer and then install via HTTP:
 ```bash
 boot tftp:netbsd-INSTALL.gz
 ```
@@ -65,6 +71,9 @@ boot tftp:netbsd-INSTALL.gz
 ## References
 - https://www.linux.org/threads/lfcs-%E2%80%93-understanding-pxe-boot.44379/
 - https://linux.die.net/man/8/in.tftpd
+- https://wiki.netbsd.org/tutorials/how_to_install__40__boot__41___netbsd_using_pxelinux/
+- https://wiki.netbsd.org/ports/i386/
 
 ## Future Integration?
 - https://github.com/madworx/docker-netbsd/tree/master
+- https://man.netbsd.org/NetBSD-10.0/x86/boot.cfg.5
