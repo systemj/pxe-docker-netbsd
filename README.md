@@ -14,6 +14,7 @@ docker-compose run setup
 
 ## Setup NetBSD Files
 This adds the necessary files from the NetBSD ISO to `tftpboot` and adds the pxelinux menu entry.
+_NOTE: This can fail the first time due to the loop module not being loaded at the host level - running it second time should work fine._
 ```bash
 docker-compose run setup-netbsd
 ```
@@ -45,7 +46,7 @@ subnet 192.168.86.0 netmask 255.255.255.0 {
 }
 
 host jetway {
-    hardware ethernet  00:30:18:b0:0e:a3;
+    hardware ethernet 00:30:18:b0:0e:a3;
     server-name "jetway.localdomain";
     fixed-address 192.168.86.123;
     next-server 192.168.86.42;
